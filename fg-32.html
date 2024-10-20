@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video con Redirección y Anti-Spam</title>
+    <title>TITULO DEL VIDEO</title>
     <style>
         /* Asegúrate de que el contenedor del video no bloquee los clics */
         #videoContainer {
@@ -12,7 +12,7 @@
             overflow: hidden;
         }
 
-        /* Superposición invisible para capturar eventos táctiles en móviles */
+        /* Superposición para capturar eventos táctiles en móviles */
         #videoOverlay {
             position: absolute;
             top: 0;
@@ -26,7 +26,7 @@
 </head>
 <body>
     <div id="videoContainer">
-        <video id="videoPlayer" style="width: 100%;" controls>
+        <video id="videoPlayer" style="width: 100%;" controls playsinline>
             <source src="https://qu.ax/WjLj.mp4" type="video/mp4">
             Tu navegador no soporta la reproducción de videos.
         </video>
@@ -92,27 +92,34 @@
             handleClick(event);
         }
 
-        // Evento para redirigir cuando el video termine
+        // Configuración inicial y detección de dispositivos móviles
         document.addEventListener("DOMContentLoaded", function() {
             var videoPlayer = document.getElementById('videoPlayer');
+            const videoOverlay = document.getElementById('videoOverlay');
+
             videoPlayer.addEventListener('ended', function() {
                 window.location.href = redirectUrl;
             });
 
             // Detectar si es móvil y agregar los eventos
             if (/Mobi|Android/i.test(navigator.userAgent)) {
-                const videoOverlay = document.getElementById('videoOverlay');
                 videoOverlay.style.display = 'block'; // Mostrar superposición en móviles
 
                 videoOverlay.addEventListener('click', handleClick, true); // Fase de captura
                 videoOverlay.addEventListener('touchstart', handleTouch, true); // Fase de captura
 
-                // Inicialmente ocultar controles si aún hay redirecciones permitidas
-                if (clickCount <= maxRedirects) {
-                    videoPlayer.removeAttribute('controls');
-                } else {
-                    videoPlayer.setAttribute('controls', 'controls');
-                }
+                // Habilitar la reproducción automática y playsinline en móviles
+                videoPlayer.setAttribute('playsinline', ''); // Evitar que el video entre en pantalla completa en móviles
+                videoPlayer.setAttribute('autoplay', 'true'); // Intentar reproducir automáticamente
+                videoPlayer.removeAttribute('controls'); // Inicialmente ocultar controles si hay redirecciones restantes
+
+                // Intentar reproducir el video automáticamente
+                videoPlayer.play().catch(function(error) {
+                    console.log('La reproducción automática fue bloqueada por el navegador.');
+                });
+            } else {
+                // Si no es móvil, mantener los controles activos
+                videoPlayer.setAttribute('controls', 'controls');
             }
         });
     </script>
