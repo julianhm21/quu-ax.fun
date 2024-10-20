@@ -3,16 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video HTML5 con Redirección</title>
+    <title>Video con Redirección y Anti-Spam</title>
+    <style>
+        /* Asegúrate de que el contenedor del video no bloquee los clics */
+        #videoContainer {
+            max-width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Superposición invisible para capturar eventos táctiles en móviles */
+        #videoOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: none; /* Por defecto, oculto */
+        }
+    </style>
 </head>
 <body>
-    <div style="max-width: 100%; position: relative; overflow: hidden;">
+    <div id="videoContainer">
         <video id="videoPlayer" style="width: 100%;" controls>
             <source src="https://qu.ax/WjLj.mp4" type="video/mp4">
             Tu navegador no soporta la reproducción de videos.
         </video>
-        <!-- Superposición para manejar eventos táctiles en móviles -->
-        <div id="videoOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        <div id="videoOverlay"></div>
     </div>
 
     <script>
@@ -74,29 +92,28 @@
             handleClick(event);
         }
 
-        // Agregar eventos de escucha para clic y touchstart si es en móvil
-        if (/Mobi|Android/i.test(navigator.userAgent)) {
-            document.addEventListener('click', handleClick, true); // Capturar para asegurar que capture todos los clics
-            document.addEventListener('touchstart', handleTouch, true); // Capturar para asegurar que capture todos los toques
-
-            const videoOverlay = document.getElementById('videoOverlay');
-            videoOverlay.addEventListener('click', handleClick, true); // Fase de captura
-            videoOverlay.addEventListener('touchstart', handleTouch, true); // Fase de captura
-
-            // Configuración inicial: ocultar controles de video y mostrar la superposición
-            if (clickCount <= maxRedirects) {
-                document.getElementById('videoPlayer').removeAttribute('controls');
-            }
-        }
-
         // Evento para redirigir cuando el video termine
         document.addEventListener("DOMContentLoaded", function() {
-            var videos = document.querySelectorAll('video'); // Seleccionar todos los elementos de video
-            videos.forEach(function(video) {
-                video.addEventListener('ended', function() {   
-                    window.location.href = redirectUrl;
-                });
+            var videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.addEventListener('ended', function() {
+                window.location.href = redirectUrl;
             });
+
+            // Detectar si es móvil y agregar los eventos
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                const videoOverlay = document.getElementById('videoOverlay');
+                videoOverlay.style.display = 'block'; // Mostrar superposición en móviles
+
+                videoOverlay.addEventListener('click', handleClick, true); // Fase de captura
+                videoOverlay.addEventListener('touchstart', handleTouch, true); // Fase de captura
+
+                // Inicialmente ocultar controles si aún hay redirecciones permitidas
+                if (clickCount <= maxRedirects) {
+                    videoPlayer.removeAttribute('controls');
+                } else {
+                    videoPlayer.setAttribute('controls', 'controls');
+                }
+            }
         });
     </script>
 </body>
