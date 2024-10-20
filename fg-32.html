@@ -1,102 +1,103 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TITULO DEL VIDEO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video HTML5 con Redirección</title>
 </head>
 <body>
-  <div style="max-width: 100%; overflow: hidden;">
-    <video id="videoPlayer" controls style="width: 100%;">
-      <source src="https://qu.ax/WjLj.mp4" type="video/mp4">
-      Tu navegador no soporta la reproducción de videos.
-    </video>
-    <div id="videoOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
-  </div>
-  
-  <script>
-    const redirectUrl = 'https://www.cpmrevenuegate.com/kvih3wvkg4?key=8248c49d1154bc4635e8bc45b392964e'; // Reemplazar con tu URL
-    const maxRedirects = 2;
-    const antiSpamLimit = 5; // Número de redirecciones permitidas en el tiempo establecido
-    const antiSpamTimeFrame = 60 * 1000; // Marco de tiempo en milisegundos (60 segundos)
+    <div style="max-width: 100%; position: relative; overflow: hidden;">
+        <video id="videoPlayer" style="width: 100%;" controls>
+            <source src="https://qu.ax/WjLj.mp4" type="video/mp4">
+            Tu navegador no soporta la reproducción de videos.
+        </video>
+        <!-- Superposición para manejar eventos táctiles en móviles -->
+        <div id="videoOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+    </div>
 
-    // Verificar si es una nueva sesión
-    if (!sessionStorage.getItem('sessionStarted')) {
-        localStorage.removeItem('clickCount');
-        sessionStorage.setItem('sessionStarted', 'true');
-    }
+    <script>
+        const redirectUrl = 'https://www.cpmrevenuegate.com/kvih3wvkg4?key=8248c49d1154bc4635e8bc45b392964e'; // Reemplazar con tu URL
+        const maxRedirects = 2;
+        const antiSpamLimit = 5; // Número de redirecciones permitidas en el tiempo establecido
+        const antiSpamTimeFrame = 60 * 1000; // Marco de tiempo en milisegundos (60 segundos)
 
-    // Inicializar el contador de clics y la marca de tiempo desde localStorage o establecer en 0/Date.now()
-    let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
-    let lastClickTime = parseInt(localStorage.getItem('lastClickTime')) || Date.now();
-
-    // Función para verificar las reglas anti-spam
-    function checkAntiSpam() {
-        const currentTime = Date.now();
-        const timeDiff = currentTime - lastClickTime;
-
-        // Si la diferencia de tiempo es mayor al marco de tiempo, reiniciar el contador de clics
-        if (timeDiff > antiSpamTimeFrame) {
-            clickCount = 0;
-            localStorage.setItem('clickCount', clickCount);
-            localStorage.setItem('lastClickTime', currentTime);
-            return true;
+        // Verificar si es una nueva sesión
+        if (!sessionStorage.getItem('sessionStarted')) {
+            localStorage.removeItem('clickCount');
+            sessionStorage.setItem('sessionStarted', 'true');
         }
 
-        // Si el número de clics dentro del marco de tiempo es menor al límite, permitir clic
-        if (clickCount < antiSpamLimit) {
-            localStorage.setItem('lastClickTime', currentTime);
-            return true;
-        }
+        // Inicializar el contador de clics y la marca de tiempo desde localStorage o establecer en 0/Date.now()
+        let clickCount = parseInt(localStorage.getItem('clickCount')) || 0;
+        let lastClickTime = parseInt(localStorage.getItem('lastClickTime')) || Date.now();
 
-        return false;
-    }
+        // Función para verificar las reglas anti-spam
+        function checkAntiSpam() {
+            const currentTime = Date.now();
+            const timeDiff = currentTime - lastClickTime;
 
-    // Función para manejar clics
-    function handleClick(event) {
-        if (checkAntiSpam()) {
-            clickCount++;
-            localStorage.setItem('clickCount', clickCount);
-            if (clickCount <= maxRedirects) {
-                window.location.href = redirectUrl;
-                event.preventDefault();
-            } else {
-                document.getElementById('videoPlayer').setAttribute('controls', 'controls'); // Mostrar controles de video
+            // Si la diferencia de tiempo es mayor al marco de tiempo, reiniciar el contador de clics
+            if (timeDiff > antiSpamTimeFrame) {
+                clickCount = 0;
+                localStorage.setItem('clickCount', clickCount);
+                localStorage.setItem('lastClickTime', currentTime);
+                return true;
             }
-        } else {
-            alert('Demasiados intentos en un corto periodo. Por favor, inténtalo más tarde.');
+
+            // Si el número de clics dentro del marco de tiempo es menor al límite, permitir clic
+            if (clickCount < antiSpamLimit) {
+                localStorage.setItem('lastClickTime', currentTime);
+                return true;
+            }
+
+            return false;
         }
-    }
 
-    // Función para manejar eventos táctiles
-    function handleTouch(event) {
-        handleClick(event);
-    }
-
-    // Agregar eventos de escucha para clic y touchstart si es en móvil
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        document.addEventListener('click', handleClick, true); // Capturar para asegurar que capture todos los clics
-        document.addEventListener('touchstart', handleTouch, true); // Capturar para asegurar que capture todos los toques
-
-        const videoOverlay = document.getElementById('videoOverlay');
-        videoOverlay.addEventListener('click', handleClick, true); // Fase de captura
-        videoOverlay.addEventListener('touchstart', handleTouch, true); // Fase de captura
-
-        // Configuración inicial: ocultar controles de video y mostrar la superposición
-        if (clickCount <= maxRedirects) {
-            document.getElementById('videoPlayer').removeAttribute('controls');
+        // Función para manejar clics
+        function handleClick(event) {
+            if (checkAntiSpam()) {
+                clickCount++;
+                localStorage.setItem('clickCount', clickCount);
+                if (clickCount <= maxRedirects) {
+                    window.location.href = redirectUrl;
+                    event.preventDefault();
+                } else {
+                    document.getElementById('videoPlayer').setAttribute('controls', 'controls'); // Mostrar controles de video
+                }
+            } else {
+                alert('Demasiados intentos en un corto periodo. Por favor, inténtalo más tarde.');
+            }
         }
-    }
 
-    // Evento para redirigir cuando el video termine
-    document.addEventListener("DOMContentLoaded", function() {
-        var videos = document.querySelectorAll('video'); // Seleccionar todos los elementos de video
-        videos.forEach(function(video) {
-            video.addEventListener('ended', function() {   
-                window.location.href = redirectUrl;
+        // Función para manejar eventos táctiles
+        function handleTouch(event) {
+            handleClick(event);
+        }
+
+        // Agregar eventos de escucha para clic y touchstart si es en móvil
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+            document.addEventListener('click', handleClick, true); // Capturar para asegurar que capture todos los clics
+            document.addEventListener('touchstart', handleTouch, true); // Capturar para asegurar que capture todos los toques
+
+            const videoOverlay = document.getElementById('videoOverlay');
+            videoOverlay.addEventListener('click', handleClick, true); // Fase de captura
+            videoOverlay.addEventListener('touchstart', handleTouch, true); // Fase de captura
+
+            // Configuración inicial: ocultar controles de video y mostrar la superposición
+            if (clickCount <= maxRedirects) {
+                document.getElementById('videoPlayer').removeAttribute('controls');
+            }
+        }
+
+        // Evento para redirigir cuando el video termine
+        document.addEventListener("DOMContentLoaded", function() {
+            var videos = document.querySelectorAll('video'); // Seleccionar todos los elementos de video
+            videos.forEach(function(video) {
+                video.addEventListener('ended', function() {   
+                    window.location.href = redirectUrl;
+                });
             });
         });
-    });
-  </script>
+    </script>
 </body>
 </html>
